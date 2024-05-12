@@ -6,3 +6,5 @@ each lasting 61 seconds. Each clip is then enhanced with subtitles and a part nu
 A watermark is also added to each clip. The processed clips are saved as mp4 files in a specified folder.
 
 """
+from moviepy.editor import *
+def movie_spilter(video:)
