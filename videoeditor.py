@@ -13,17 +13,27 @@ from moviepy.editor import *
 
 
 def concatenate_clips(clip1_path: str, clip2_path: str):
-    """Combines two clips together. Temp variable names. CXhange later"""
-    clip1 = VideoFileClip(clip1_path).resize(0.6)
+    """Combines two clips together. Temp variable names. CXhange later
+    - preconditions:
+        - duration of clip2 is at least duration of clip1
+    """
+    clip1 = VideoFileClip(clip1_path)
     clip2 = VideoFileClip(clip2_path)
+    background1 = ColorClip(size=(1080, 192), color='black').set_duration(clip1.duration)
+    background2 = ColorClip(size=(1080, 192), color='black').set_duration(clip1.duration)
+
+    # resizing clip1 to be 1366 X 768
+    clip1 = clip1.resize((1366, 768))
+    clip2 = clip2.resize((1366, 768))
+
     center_x1, center_y1 = clip1.w / 2, clip1.h / 2
     center_x2, center_y2 = clip2.w / 2, clip2.h / 2
-    crop_x1, crop_y1 = center_x1 - 1080 / 2, center_y1 - 1920 / 2
-    crop_x2, crop_y2 = center_x2 - 1080 / 2, center_y2 - 1920 / 2
-    clip1 = clip1.crop(width=1080)
-    clip2 = clip2.crop(x1=crop_x2, y1=crop_y2, width=1080, height=(1920 - clip1.h))
-    final_clip = clips_array([[clip1], [clip2]])
-    final_clip.resize((1080, 1920)).write_videofile("my_stack.mp4")
+
+    clip1 = clip1.crop(x1=143, y1=768, x2=683, y2=0)
+    clip2 = clip2.crop(x1=143, y1=768, x2=683, y2=0)
+
+    final_clip = clips_array([[background1], [clip1], [clip2], [background2]])
+    final_clip.write_videofile("my_stack.mp4")
 
 
 def movie_splitter(filename: str):
