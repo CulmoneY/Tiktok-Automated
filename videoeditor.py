@@ -56,17 +56,29 @@ def os_movie_splitter(movie_path: str):
     num_parts = math.ceil(duration / 61)
     for part in range(1, num_parts):
         # spilt into the 61-second segment
-        os.system(f'ffmpeg -y -ss {61 * (part - 1)} -i {movie_path} -t 61 -map 0 -c copy -r 30 part_{part}.mp4')
+        start = format_time(61 * (part - 1))
+        os.system(f'ffmpeg -y -ss {start} -i {movie_path} -t 00:01:01 -map 0 -r 30 part_{part}.mp4')
 
     # for the remaining portion of the video
-    final_start = 61 * (num_parts - 1)
-    # final_duration = duration - final_start
-    # os.system(f'ffmpeg -y -ss {final_start} -i {movie_path} -t {final_duration} -map 0 -c copy -r 30 part_{num_parts}.mp4')
-    os.system(f'ffmpeg -y -i {movie_path} -vf trim={final_start}:{duration} -r 30 part_{num_parts}.mp4')
+    final_start = format_time(61 * (num_parts - 1))
+    final_duration = format_time(duration - (61 * (num_parts - 1)))
+    os.system(f'ffmpeg -y -ss {final_start} -i {movie_path} -t {final_duration} -map 0 -r 30 part_{num_parts}.mp4')
 
 
+def format_time(seconds: float) -> str:
+    """Converts the time from decimal format to sexagecimal format:
+        HH:MM:SS.MS
+    """
 
+    hours = math.floor(seconds / 3600)
+    seconds %= 3600
+    minutes = math.floor(seconds / 60)
+    seconds %= 60
+    milliseconds = round((seconds - math.floor(seconds)) * 1000)
+    seconds = math.floor(seconds)
+    formatted_time = f"{hours:02d}:{minutes:02d}:{seconds:01d}.{milliseconds:03d}"
 
+    return formatted_time
 
 
 def concatenate_clips(clip1_path: str, clip2_path: str):
