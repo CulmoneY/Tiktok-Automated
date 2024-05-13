@@ -7,9 +7,33 @@ A watermark is also added to each clip. The processed clips are saved as mp4 fil
 
 """
 import math
+import random
+
 import PIL
 from subtitlegenerator import run
 from moviepy.editor import *
+import os
+
+
+def os_concatenate(clip1_path: str, clip2_path: str):
+    """
+    acts like concatenate_clips but uses os.system to call ffmpeg to concatenate the clips
+    :param clip1_path:
+    :param clip2_path:
+    :return:
+    """
+    t = 61
+    # create a black background
+    background = ColorClip(size=(1080, 192), color=(0, 0, 0), duration=t)
+    # export to a temp file
+    background.write_videofile("temp/temp.mp4", fps=1)
+    # rescale the clips
+    os.system(f"ffmpeg -y -i {clip1_path} -vf scale=1080:768 temp/clip1_rescaled.mp4")
+    os.system(f"ffmpeg -y -i {clip2_path} -vf scale=1080:768 temp/clip2_rescaled.mp4")
+    # concatenate the clips
+    directory = os.path.dirname(os.path.realpath("videoeditor.py"))
+    os.system(f"cd /d {directory}")
+    os.system(f"ffmpeg -y -i temp/temp.mp4 -i temp/clip1_rescaled.mp4 -i temp/clip2_rescaled.mp4 -i temp/temp.mp4 -filter_complex vstack=inputs=4 output.mp4")
 
 
 def concatenate_clips(clip1_path: str, clip2_path: str):
@@ -17,20 +41,21 @@ def concatenate_clips(clip1_path: str, clip2_path: str):
     - preconditions:
         - duration of clip2 is at least duration of clip1
     """
+    n = 61
     clip1 = VideoFileClip(clip1_path)
     clip2 = VideoFileClip(clip2_path)
-    background1 = ColorClip(size=(1080, 192), color=(0,0,0), duration=61)
-    background2 = ColorClip(size=(1080, 192), color=(0,0,0), duration=61)
+    background1 = ColorClip(size=(1080, 192), color=(0,0,0), duration=n)
+    background2 = ColorClip(size=(1080, 192), color=(0,0,0), duration=n)
 
     # resizing clip1 to be 1366 X 768
     clip1 = clip1.resize((1366, 768))
     clip2 = clip2.resize((1366, 768))
 
-    # clip1 = clip1.crop(x1=143, y1=0, x2=683, y2=768)
-    # clip2 = clip2.crop(x1=143, y1=0, x2=683, y2=768)
+    clip1 = clip1.crop(x1=143, y1=0, x2=1223, y2=768)
+    clip2 = clip2.crop(x1=143, y1=0, x2=1223, y2=768)
 
     final_clip = clips_array([[background1], [clip1], [clip2], [background2]])
-    final_clip.write_videofile("my_stack.mp4")
+    final_clip.write_videofile("my_stack2.mp4", fps=30)
 
 
 def movie_splitter(filename: str):
@@ -63,6 +88,29 @@ def movie_splitter(filename: str):
 
     result = CompositeVideoClip([video_part, txt_clip])
     result.set_duration(video_part.duration).write_videofile(f"part_{num_parts}.mp4")
+
+
+def get_brainrot(duration: float) -> VideoFileClip:
+    """Returns a tiktok brainrot complilation the exact same duration as the specified value. Each 61 second segments will be a different
+    random segment
+    The videos within brainrot are labelled in sequential order {ex: 1, 2, 3 ...}
+    """
+    # How many files are in brainrot
+    directory = 'brainrot/'
+    entries = os.listdir(directory)
+    file_count = sum(1 for entry in entries if os.path.isfile(os.path.join(directory, entry)))
+    print(f"Number of files in '{directory}': {file_count}")
+
+    # Select the random video
+    video_name = f'brainrot/{random.randint(1, file_count)}'
+
+
+def get_61segment(video: VideoFileClip) -> VideoFileClip:
+    """Acts as a helper function to get_brainrot, and returns a 61-second segment of the given video"""
+    maximimum_start = int((video.duration % 61) - 61)
+    starttime = random.random
+
+
 
 
 def subtitles(captions: list) -> list:
