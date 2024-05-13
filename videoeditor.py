@@ -11,6 +11,8 @@ from subtitlegenerator import run
 from moviepy.editor import *
 
 
+def resize_file
+
 def movie_splitter(filename: str):
     """Spilts the given video into multiple 61 second parts. Each clip is labeled with its respective part number.
 
