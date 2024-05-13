@@ -8,8 +8,7 @@ A watermark is also added to each clip. The processed clips are saved as mp4 fil
 """
 import math
 import random
-
-import PIL
+import subprocess
 from subtitlegenerator import run
 from moviepy.editor import *
 import os
@@ -44,7 +43,25 @@ def os_concatenate(clip1_path: str, clip2_path: str):
         print('File does not exist.')
 
 
-def
+def os_movie_splitter(movie_path: str):
+    """
+    splits the movie into 61 second parts
+    :param movie_path:
+    :return:
+    """
+    command = 'ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 part_1.mp4'
+    process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+    duration = float(process.stdout.strip())
+
+    num_parts = math.ceil(duration / 61)
+    for part in range(1, num_parts):
+        # spilt into the 61-second segment
+        os.system(f'ffmpeg -y -ss {61 * (part - 1)} -i {movie_path} -t 61 -map 0 -c copy -r 30 part_{part}.mp4')
+
+    # for the remaining portion of the video
+    final_duration = duration - 61 * (num_parts - 1)
+    os.system(f'ffmpeg -y -copyts -ss {final_duration} -i {movie_path} -to {duration} -map 0 -c copy -r 30 part_{num_parts}.mp4')
+
 
 
 
