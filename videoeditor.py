@@ -7,20 +7,23 @@ A watermark is also added to each clip. The processed clips are saved as mp4 fil
 
 """
 import math
+import PIL
 from subtitlegenerator import run
 from moviepy.editor import *
 
 
-def concatenate_clips(clip1: str, clip2: str):
+def concatenate_clips(clip1_path: str, clip2_path: str):
     """Combines two clips together. Temp variable names. CXhange later"""
-    clip1 = VideoFileClip("myvideo.mp4")
-    clip2 = clip1.fx(vfx.mirror_x)
-    clip3 = clip1.fx(vfx.mirror_y)
-    clip4 = clip1.resize(0.60)  # downsize 60%
-    final_clip = clips_array([[clip1, clip2],
-                              [clip3, clip4]])
-    final_clip.resize(width=480).write_videofile("my_stack.mp4")
-
+    clip1 = VideoFileClip(clip1_path).resize(0.6)
+    clip2 = VideoFileClip(clip2_path)
+    center_x1, center_y1 = clip1.w / 2, clip1.h / 2
+    center_x2, center_y2 = clip2.w / 2, clip2.h / 2
+    crop_x1, crop_y1 = center_x1 - 1080 / 2, center_y1 - 1920 / 2
+    crop_x2, crop_y2 = center_x2 - 1080 / 2, center_y2 - 1920 / 2
+    clip1 = clip1.crop(width=1080)
+    clip2 = clip2.crop(x1=crop_x2, y1=crop_y2, width=1080, height=(1920 - clip1.h))
+    final_clip = clips_array([[clip1], [clip2]])
+    final_clip.resize((1080, 1920)).write_videofile("my_stack.mp4")
 
 
 def movie_splitter(filename: str):
