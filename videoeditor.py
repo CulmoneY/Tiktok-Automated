@@ -10,8 +10,18 @@ import math
 from subtitlegenerator import run
 from moviepy.editor import *
 
+def concatenate_clips(clip1: str, clip2: str):
+    """Combines two clips together. Temp variable names. CXhange later"""
+    video1 = VideoFileClip('clip1')
+    video1.w = 1080
+    video2 = VideoFileClip('clip2')
+    video2.w = 1080
+    video2.h = 1920 - video1.h
+    final_clip = clips_array([video1, video2])
+    final_clip.h = 1920
+    final_clip.write_videofile("concatenate_test.mp4")
 
-def resize_file
+
 
 def movie_splitter(filename: str):
     """Spilts the given video into multiple 61 second parts. Each clip is labeled with its respective part number.
