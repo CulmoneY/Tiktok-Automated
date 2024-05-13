@@ -21,6 +21,6 @@ Have you ever seen a movie split into 50 parts on TikTok and thought "holy shit,
 - moviepy
     - [imagemagick](https://imagemagick.org/index.php)
 - ffmpeg-python
-- whisper
+- openai-whisper
   
 imagemagick should be installed separately (not using pip). After installation, be sure to correctly set the path of 'IMAGEMAGICK_BINARY' under external_libraries/site-packages/moviepy/config_defaults.py to 'C:\Program Files\ImageMagick-versionnumber\magick.exe', or wherever your installation was made to.
