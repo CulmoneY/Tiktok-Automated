@@ -27,13 +27,27 @@ def os_concatenate(clip1_path: str, clip2_path: str):
     background = ColorClip(size=(1080, 192), color=(0, 0, 0), duration=t)
     # export to a temp file
     background.write_videofile("temp/temp.mp4", fps=1)
-    # rescale the clips
-    os.system(f"ffmpeg -y -i {clip1_path} -vf scale=1080:768 temp/clip1_rescaled.mp4")
-    os.system(f"ffmpeg -y -i {clip2_path} -vf scale=1080:768 temp/clip2_rescaled.mp4")
+    # rescale and crop the clips
+    os.system(f"ffmpeg -y -i {clip1_path} -vf scale=1366:768,crop=1080:768:143:0 -r 30 temp/clip1_cropped.mp4")
+    os.system(f"ffmpeg -y -i {clip2_path} -vf scale=1366:768,crop=1080:768:143:0 -r 30 temp/clip2_cropped.mp4")
     # concatenate the clips
-    directory = os.path.dirname(os.path.realpath("videoeditor.py"))
-    os.system(f"cd /d {directory}")
-    os.system(f"ffmpeg -y -i temp/temp.mp4 -i temp/clip1_rescaled.mp4 -i temp/clip2_rescaled.mp4 -i temp/temp.mp4 -filter_complex vstack=inputs=4 output.mp4")
+    # directory = os.path.dirname(os.path.realpath("videoeditor.py"))
+    # os.system(f"cd /d {directory}")
+    os.system('ffmpeg -y -i temp/temp.mp4 -i temp/clip1_cropped.mp4 -i temp/clip2_cropped.mp4 -i temp/temp.mp4 '
+              '-filter_complex "[0:v][1:v]vstack=inputs=4[v]" -map "[v]" -map 1:a -r 30 output.mp4')
+    # clean up temp files
+    if os.path.isfile("temp/temp.mp4") and os.path.isfile("temp/clip1_cropped.mp4") and os.path.isfile("temp/clip2_cropped.mp4"):
+        os.remove("temp/temp.mp4")
+        os.remove("temp/clip1_cropped.mp4")
+        os.remove("temp/clip2_cropped.mp4")
+    else:
+        print('File does not exist.')
+
+
+def
+
+
+
 
 
 def concatenate_clips(clip1_path: str, clip2_path: str):
@@ -65,29 +79,33 @@ def movie_splitter(filename: str):
     video: The path to the MP4 video file
     """
     video = VideoFileClip(filename)
-    print("Video Duration: ", video.duration)
     num_parts = math.ceil(video.duration / 61)
-    print(num_parts)
+
 
     # Get the subtitles
-    video = CompositeVideoClip([video] + subtitles(run(filename)))
+    parkour = CompositeVideoClip([get_brainrot(video.duration)] + subtitles(run(filename)))
 
     for part in range(1, num_parts):
         # Make the part text
         txt_clip = (TextClip(f"Part {part}", fontsize=20, color='black', bg_color='white')
                     .set_position(('center', 0.1), relative=True).set_duration(10))
         video_part = video.subclip(61 * (part - 1), 61 * part)
+        parkour_part = parkour.subclip(61 * (part - 1), 61 * part)
+
         result = CompositeVideoClip([video_part, txt_clip])
         result.write_videofile(f"part_{part}.mp4")
+        parkour_part.write_videofile(f"part_{part}parkour.mp4")
 
     # for the remaining portion of the video
     final_duration = min(10, video.duration - 61 * (num_parts - 1))
     txt_clip = (TextClip(f"Final", fontsize=20, color='black', bg_color='white')
                 .set_position(('center', 0.1), relative=True).set_duration(final_duration)) # for subtitles, this should be a list of TextClips
     video_part = video.subclip(61 * (num_parts - 1))
+    parkour_part = parkour.subclip(61 * (num_parts - 1))
 
     result = CompositeVideoClip([video_part, txt_clip])
     result.set_duration(video_part.duration).write_videofile(f"part_{num_parts}.mp4")
+    parkour_part.set_duration(video_part.duration).write_videofile(f"part_{num_parts}parkour.mp4")
 
 
 def get_brainrot(duration: float) -> VideoFileClip:
@@ -95,20 +113,32 @@ def get_brainrot(duration: float) -> VideoFileClip:
     random segment
     The videos within brainrot are labelled in sequential order {ex: 1, 2, 3 ...}
     """
-    # How many files are in brainrot
-    directory = 'brainrot/'
-    entries = os.listdir(directory)
-    file_count = sum(1 for entry in entries if os.path.isfile(os.path.join(directory, entry)))
-    print(f"Number of files in '{directory}': {file_count}")
+    # # How many files are in brainrot
+    # directory = 'brainrot/'
+    # entries = os.listdir(directory)
+    # # Define a tuple of video file extensions
+    # video_extensions = ('.mp4', '.avi', '.mov', '.mkv')
+    # file_count = sum(
+    #     1 for entry in entries if entry.endswith(video_extensions) and os.path.isfile(os.path.join(directory, entry)))
 
-    # Select the random video
-    video_name = f'brainrot/{random.randint(1, file_count)}'
+    videos = []
+    numclips = math.ceil(duration / 61)
+    for _ in range(numclips):
+        # Select the random video
+        # video_name = f'brainrot/{random.randint(1, file_count)}'
+        video_name = 'brainrot/output2.mp4'
+        segment = get_61segment(VideoFileClip(video_name))
+        videos.append(segment)
+    final_video = concatenate_videoclips(videos).set_duration(duration)
+    return final_video
 
 
 def get_61segment(video: VideoFileClip) -> VideoFileClip:
     """Acts as a helper function to get_brainrot, and returns a 61-second segment of the given video"""
-    maximimum_start = int((video.duration % 61) - 61)
-    starttime = random.random
+    maximimum_start = int(video.duration - 61)
+    starttime = random.randrange(0, maximimum_start)
+    segment = video.subclip(starttime, starttime + 61)
+    return segment
 
 
 
