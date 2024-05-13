@@ -57,7 +57,8 @@ def os_movie_splitter(movie_path: str):
     for part in range(1, num_parts):
         # spilt into the 61-second segment
         start = format_time(61 * (part - 1))
-        os.system(f'ffmpeg -y -ss {start} -i {movie_path} -t 00:01:01 -map 0 -r 30 part_{part}.mp4')
+        os.system(f'ffmpeg -y -ss {start} -i {movie_path} -t 00:01:01 -map 0 -r 30 temp/temppart_{part}.mp4')
+        os.system(f"")
 
     # for the remaining portion of the video
     final_start = format_time(61 * (num_parts - 1))
