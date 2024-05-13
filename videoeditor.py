@@ -10,16 +10,16 @@ import math
 from subtitlegenerator import run
 from moviepy.editor import *
 
+
 def concatenate_clips(clip1: str, clip2: str):
     """Combines two clips together. Temp variable names. CXhange later"""
-    video1 = VideoFileClip('clip1')
-    video1.w = 1080
-    video2 = VideoFileClip('clip2')
-    video2.w = 1080
-    video2.h = 1920 - video1.h
-    final_clip = clips_array([video1, video2])
-    final_clip.h = 1920
-    final_clip.write_videofile("concatenate_test.mp4")
+    clip1 = VideoFileClip("myvideo.mp4")
+    clip2 = clip1.fx(vfx.mirror_x)
+    clip3 = clip1.fx(vfx.mirror_y)
+    clip4 = clip1.resize(0.60)  # downsize 60%
+    final_clip = clips_array([[clip1, clip2],
+                              [clip3, clip4]])
+    final_clip.resize(width=480).write_videofile("my_stack.mp4")
 
 
 
