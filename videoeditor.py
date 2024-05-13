@@ -19,18 +19,15 @@ def concatenate_clips(clip1_path: str, clip2_path: str):
     """
     clip1 = VideoFileClip(clip1_path)
     clip2 = VideoFileClip(clip2_path)
-    background1 = ColorClip(size=(1080, 192), color='black').set_duration(clip1.duration)
-    background2 = ColorClip(size=(1080, 192), color='black').set_duration(clip1.duration)
+    background1 = ColorClip(size=(1080, 192), color=(0,0,0), duration=61)
+    background2 = ColorClip(size=(1080, 192), color=(0,0,0), duration=61)
 
     # resizing clip1 to be 1366 X 768
     clip1 = clip1.resize((1366, 768))
     clip2 = clip2.resize((1366, 768))
 
-    center_x1, center_y1 = clip1.w / 2, clip1.h / 2
-    center_x2, center_y2 = clip2.w / 2, clip2.h / 2
-
-    clip1 = clip1.crop(x1=143, y1=768, x2=683, y2=0)
-    clip2 = clip2.crop(x1=143, y1=768, x2=683, y2=0)
+    # clip1 = clip1.crop(x1=143, y1=0, x2=683, y2=768)
+    # clip2 = clip2.crop(x1=143, y1=0, x2=683, y2=768)
 
     final_clip = clips_array([[background1], [clip1], [clip2], [background2]])
     final_clip.write_videofile("my_stack.mp4")
