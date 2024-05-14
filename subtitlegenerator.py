@@ -5,6 +5,7 @@ This file is responsible for generating subtitles for a given video.
 import ffmpeg
 import whisper
 import os
+import math
 
 input_video = ""
 input_video_name = input_video.replace(".mp4", "")
@@ -38,7 +39,7 @@ def transcribe(audio: str):
     :param audio: the path to the audio file
     :return: the language, and the list of segments
     """
-    model = whisper.load_model("base")
+    model = whisper.load_model("tiny.en")
     transcription = model.transcribe(audio)
     language = transcription['language']
     print("Transcription Language", language)
@@ -61,6 +62,34 @@ def clean_format(segments: list) -> list:
         formatted_segments.append(formatted_segment)
     return formatted_segments
 
+def format_time(seconds):
+    hours = math.floor(seconds / 3600)
+    seconds %= 3600
+    minutes = math.floor(seconds / 60)
+    seconds %= 60
+    milliseconds = round((seconds - math.floor(seconds)) * 1000)
+    seconds = math.floor(seconds)
+    formatted_time = f"{hours:02d}:{minutes:02d}:{seconds:01d},{milliseconds:03d}"
+
+    return formatted_time
+
+
+def generate_subtitle_file(language, segments):
+    subtitle_file = f"temp/sub-{input_video_name}.{language}.srt"
+    text = ""
+    for index, segment in enumerate(segments):
+        segment_start = format_time(segment.start)
+        segment_end = format_time(segment.end)
+        text += f"{str(index + 1)} \n"
+        text += f"{segment_start} --> {segment_end} \n"
+        text += f"{segment.text} \n"
+        text += "\n"
+
+    f = open(subtitle_file, "w")
+    f.write(text)
+    f.close()
+
+    return subtitle_file
 
 def run(inputfile: str):
     select_input(inputfile)
@@ -72,3 +101,6 @@ def run(inputfile: str):
         print('File does not exist.')
     return clean_format(segments)
 
+
+
+# how to subtitles: ffmpeg -i input.mp4 -vf "subtitles=subtitle.srt" output.mp4

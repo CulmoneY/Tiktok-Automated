@@ -32,7 +32,7 @@ def os_concatenate(clip1_path: str, clip2_path: str, part: int, duration: float 
     # directory = os.path.dirname(os.path.realpath("videoeditor.py"))
     # os.system(f"cd /d {directory}")
     os.system(f'ffmpeg -y -i temp/temp.mp4 -i temp/clip1_cropped.mp4 -i temp/clip2_cropped.mp4 -i temp/temp.mp4 '
-              f'-filter_complex "[0:v][1:v]vstack=inputs=4[v]" -map "[v]" -map 1:a -codec:a copy -r 30 output{part}.mp4')
+              f'-filter_complex "[0:v][1:v]vstack=inputs=4[v]" -map "[v]" -map 1:a -codec:a copy -r 30 outputs/output{part}.mp4')
     # clean up temp files
     if os.path.isfile("temp/temp.mp4") and os.path.isfile("temp/clip1_cropped.mp4") and os.path.isfile("temp/clip2_cropped.mp4"):
         os.remove("temp/temp.mp4")
@@ -52,6 +52,14 @@ def os_movie_splitter(movie_path: str):
     process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
     duration = float(process.stdout.strip())
 
+    # Get Font Size
+    command = "ffprobe -v error -select_streams v:0 -show_entries stream=width -of default=nw=1:nk=1 videos/video.mp4"
+    process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                             universal_newlines=True)
+    resolution = float(process.stdout.strip())
+    font_size = math.ceil(resolution / 25)
+
+
     num_parts = math.ceil(duration / 61)
     for part in range(1, num_parts):
         # spilt into the 61-second segment
@@ -61,7 +69,7 @@ def os_movie_splitter(movie_path: str):
         command = (
             f'ffmpeg -y -i temp/temppart_{part}.mp4 -vf '
             f'"drawtext=fontfile=fonts/built_titling.otf:text=\'Part {part}\':'
-            f'fontcolor=white:fontsize=24:box=1:boxcolor=black@0.5:boxborderw=5:'
+            f'fontcolor=white:fontsize={font_size}:box=1:boxcolor=black@0.5:boxborderw=5:'
             f'x=(w-text_w)/2:y=30:enable=\'between(t,0,5)\'" -codec:a copy -r 30 temp/part_{part}.mp4'
         )
         os.system(command)
@@ -85,7 +93,7 @@ def os_movie_splitter(movie_path: str):
     command = (
         f'ffmpeg -y -i temp/temppart_{num_parts}.mp4 -vf '
         f'"drawtext=fontfile=fonts/built_titling.otf:text=\'Final\':'
-        f'fontcolor=white:fontsize=24:box=1:boxcolor=black@0.5:boxborderw=5:'
+        f'fontcolor=white:fontsize={font_size}:box=1:boxcolor=black@0.5:boxborderw=5:'
         f'x=(w-text_w)/2:y=30:enable=\'between(t,0,5)\'" -codec:a copy -r 30 temp/part_{num_parts}.mp4'
     )
     os.system(command)
