@@ -107,70 +107,13 @@ def format_time(seconds: float) -> str:
     return formatted_time
 
 
-def concatenate_clips(clip1_path: str, clip2_path: str):
-    """Combines two clips together. Temp variable names. CXhange later
-    - preconditions:
-        - duration of clip2 is at least duration of clip1
-    """
-    n = 61
-    clip1 = VideoFileClip(clip1_path)
-    clip2 = VideoFileClip(clip2_path)
-    background1 = ColorClip(size=(1080, 192), color=(0,0,0), duration=n)
-    background2 = ColorClip(size=(1080, 192), color=(0,0,0), duration=n)
-
-    # resizing clip1 to be 1366 X 768
-    clip1 = clip1.resize((1366, 768))
-    clip2 = clip2.resize((1366, 768))
-
-    clip1 = clip1.crop(x1=143, y1=0, x2=1223, y2=768)
-    clip2 = clip2.crop(x1=143, y1=0, x2=1223, y2=768)
-
-    final_clip = clips_array([[background1], [clip1], [clip2], [background2]])
-    final_clip.write_videofile("my_stack2.mp4", fps=30)
-
-
-def movie_splitter(filename: str): # TODO: Delete this
-    """Spilts the given video into multiple 61 second parts. Each clip is labeled with its respective part number.
-
-    Args:
-    video: The path to the MP4 video file
-    """
-    video = VideoFileClip(filename)
-    num_parts = math.ceil(video.duration / 61)
-
-
-    # Get the subtitles
-    parkour = CompositeVideoClip([get_brainrot(video.duration)] + subtitles(run(filename)))
-
-    for part in range(1, num_parts):
-        # Make the part text
-        txt_clip = (TextClip(f"Part {part}", fontsize=20, color='black', bg_color='white')
-                    .set_position(('center', 0.1), relative=True).set_duration(10))
-        video_part = video.subclip(61 * (part - 1), 61 * part)
-        parkour_part = parkour.subclip(61 * (part - 1), 61 * part)
-
-        result = CompositeVideoClip([video_part, txt_clip])
-        result.write_videofile(f"part_{part}.mp4")
-        parkour_part.write_videofile(f"part_{part}parkour.mp4")
-
-    # for the remaining portion of the video
-    final_duration = min(10, video.duration - 61 * (num_parts - 1))
-    txt_clip = (TextClip(f"Final", fontsize=20, color='black', bg_color='white')
-                .set_position(('center', 0.1), relative=True).set_duration(final_duration)) # for subtitles, this should be a list of TextClips
-    video_part = video.subclip(61 * (num_parts - 1))
-    parkour_part = parkour.subclip(61 * (num_parts - 1))
-
-    result = CompositeVideoClip([video_part, txt_clip])
-    result.set_duration(video_part.duration).write_videofile(f"part_{num_parts}.mp4")
-    parkour_part.set_duration(video_part.duration).write_videofile(f"part_{num_parts}parkour.mp4") # R # TODO: Delete
-
-
 def get_brainrot(duration: float, part: int):
     """Returns a tiktok brainrot complilation the exact same duration as the specified value. Each 61 second segments will be a different
     random segment.
     The videos within brainrot are labelled in sequential order {ex: brainrot_1, brainrot_2, brainrot_3 ...}
     Preconditions:
         - 0 < duration <= 61
+        - brainrot clips do not contain any spaces in their names
     """
     # # How many files are in brainrot
     directory = 'brainrot/'
@@ -187,6 +130,7 @@ def get_brainrot(duration: float, part: int):
     video_path = 'brainrot/' + videos[random.randint(0, file_count - 1)]
     get_61segment(video_path, part, duration)
 
+
 def get_61segment(video_path: str, part: int, duration: float):
     """Acts as a helper function to get_brainrot, and returns a 61-second segment of the given video"""
     command = f'ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 {video_path}'
@@ -196,8 +140,7 @@ def get_61segment(video_path: str, part: int, duration: float):
     maximimum_start = format_time(int(duration_video - duration))
     starttime = format_time(random.randrange(0, int(duration_video - duration)))
     duration = format_time(duration)
-    os.system(f'ffmpeg -y -ss {starttime} -i {video_path} -t {duration} -map 0 -codec:v copy -r 30 temp/brainrot{part}.mp4')
-
+    os.system(f'ffmpeg -y -ss {starttime} -i {video_path} -t {duration} -map 0 -codec:v copy -an -r 30 temp/brainrot{part}.mp4')
 
 
 def subtitles(captions: list) -> list:
