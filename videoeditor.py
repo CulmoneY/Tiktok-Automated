@@ -14,7 +14,7 @@ from moviepy.editor import *
 import os
 
 
-def os_concatenate(clip1_path: str, clip2_path: str):
+def os_concatenate(clip1_path: str, clip2_path: str, part: int):
     """
     acts like concatenate_clips but uses os.system to call ffmpeg to concatenate the clips
     :param clip1_path:
@@ -32,8 +32,8 @@ def os_concatenate(clip1_path: str, clip2_path: str):
     # concatenate the clips
     # directory = os.path.dirname(os.path.realpath("videoeditor.py"))
     # os.system(f"cd /d {directory}")
-    os.system('ffmpeg -y -i temp/temp.mp4 -i temp/clip1_cropped.mp4 -i temp/clip2_cropped.mp4 -i temp/temp.mp4 '
-              '-filter_complex "[0:v][1:v]vstack=inputs=4[v]" -map "[v]" -map 1:a -r 30 output.mp4')
+    os.system(f'ffmpeg -y -i temp/temp.mp4 -i temp/clip1_cropped.mp4 -i temp/clip2_cropped.mp4 -i temp/temp.mp4 '
+              f'-filter_complex "[0:v][1:v]vstack=inputs=4[v]" -map "[v]" -map 1:a -r 30 output{part}.mp4')
     # clean up temp files
     if os.path.isfile("temp/temp.mp4") and os.path.isfile("temp/clip1_cropped.mp4") and os.path.isfile("temp/clip2_cropped.mp4"):
         os.remove("temp/temp.mp4")
@@ -63,7 +63,7 @@ def os_movie_splitter(movie_path: str):
             f'ffmpeg -y -i temp/temppart_{part}.mp4 -vf '
             f'"drawtext=fontfile=fonts/built_titling.otf:text=\'Part {part}\':'
             f'fontcolor=white:fontsize=24:box=1:boxcolor=black@0.5:boxborderw=5:'
-            f'x=(w-text_w)/2:y=30:enable=\'between(t,0,5)\'" -codec:v -r 30 part_{part}.mp4'
+            f'x=(w-text_w)/2:y=30:enable=\'between(t,0,5)\'" -codec:a copy -r 30 temp/part_{part}.mp4'
         )
         os.system(command)
         if os.path.isfile(f'temp/temppart_{part}.mp4'):
@@ -71,6 +71,12 @@ def os_movie_splitter(movie_path: str):
 
         # Get the Parkour Video
         get_brainrot(61, part)
+
+        # Concatenate
+        os_concatenate(f'temp/part_{part}.mp4', f'temp/brainrot{part}.mp4', part)
+        if os.path.isfile(f'temp/part_{part}.mp4') and os.path.isfile(f'temp/brainrot{part}.mp4'):
+            os.remove(f'temp/part_{part}.mp4')
+            os.remove(f'temp/brainrot{part}.mp4')
 
     # for the remaining portion of the video
     final_start = format_time(61 * (num_parts - 1))
@@ -81,7 +87,7 @@ def os_movie_splitter(movie_path: str):
         f'ffmpeg -y -i temp/temppart_{num_parts}.mp4 -vf '
         f'"drawtext=fontfile=fonts/built_titling.otf:text=\'Final\':'
         f'fontcolor=white:fontsize=24:box=1:boxcolor=black@0.5:boxborderw=5:'
-        f'x=(w-text_w)/2:y=30:enable=\'between(t,0,5)\'" -codec:v copy -r 30 part_{num_parts}.mp4'
+        f'x=(w-text_w)/2:y=30:enable=\'between(t,0,5)\'" -codec:a copy -r 30 temp/part_{num_parts}.mp4'
     )
     os.system(command)
     if os.path.isfile(f'temp/temppart_{num_parts}.mp4'):
@@ -89,6 +95,12 @@ def os_movie_splitter(movie_path: str):
 
     # Get the Parkour Video
     get_brainrot(duration - (61 * (num_parts - 1)), num_parts)
+
+    # Concatenate
+    os_concatenate(f'temp/part_{num_parts}.mp4', f'temp/brainrot{num_parts}.mp4', num_parts)
+    if os.path.isfile(f'temp/part_{num_parts}.mp4') and os.path.isfile(f'temp/brainrot{num_parts}.mp4'):
+        os.remove(f'temp/part_{num_parts}.mp4')
+        os.remove(f'temp/brainrot{num_parts}.mp4')
 
 
 def format_time(seconds: float) -> str:
