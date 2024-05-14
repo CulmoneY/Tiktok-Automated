@@ -42,25 +42,25 @@ def transcribe(audio: str):
     model = whisper.load_model("tiny.en")
     transcription = model.transcribe(audio)
     language = transcription['language']
-    print("Transcription Language", language)
+    # print("Transcription Language", language)
     segments = list(transcription['segments'])
-    return segments
+    return segments, language
 
 
-def clean_format(segments: list) -> list:
-    """
-    Cleans and formats the given segments.
-    :param segments:
-    :return:
-    """
-    formatted_segments = []
-    for segment in segments:
-        start = segment['start']
-        end = segment['end']
-        text = segment['text']
-        formatted_segment = (start, end, text)
-        formatted_segments.append(formatted_segment)
-    return formatted_segments
+# def clean_format(segments: list) -> list:
+#     """
+#     Cleans and formats the given segments.
+#     :param segments:
+#     :return:
+#     """
+#     formatted_segments = []
+#     for segment in segments:
+#         start = segment['start']
+#         end = segment['end']
+#         text = segment['text']
+#         formatted_segment = (start, end, text)
+#         formatted_segments.append(formatted_segment)
+#     return formatted_segments
 
 def format_time(seconds):
     hours = math.floor(seconds / 3600)
@@ -78,11 +78,11 @@ def generate_subtitle_file(language, segments):
     subtitle_file = f"temp/sub-{input_video_name}.{language}.srt"
     text = ""
     for index, segment in enumerate(segments):
-        segment_start = format_time(segment.start)
-        segment_end = format_time(segment.end)
+        segment_start = format_time(segment['start'])
+        segment_end = format_time(segment['end'])
         text += f"{str(index + 1)} \n"
         text += f"{segment_start} --> {segment_end} \n"
-        text += f"{segment.text} \n"
+        text += f"{segment['text']} \n"
         text += "\n"
 
     f = open(subtitle_file, "w")
@@ -94,13 +94,12 @@ def generate_subtitle_file(language, segments):
 def run(inputfile: str):
     select_input(inputfile)
     extracted_audio = extract_audio()
-    segments = transcribe(audio=extracted_audio)
+    segments, language = transcribe(audio=extracted_audio)
     if os.path.isfile(extracted_audio):
         os.remove(extracted_audio)
     else:
         print('File does not exist.')
-    return clean_format(segments)
-
-
-
-# how to subtitles: ffmpeg -i input.mp4 -vf "subtitles=subtitle.srt" output.mp4
+    subtitle_file = generate_subtitle_file(language, segments)
+    os.system(f'ffmpeg -y -i {inputfile} -vf "subtitles={subtitle_file}:force_style=\'MarginV=145,MarginH=0,Alignment=6,Fontsize=8\'" {inputfile.replace(".mp4", "")}.mp4')
+    if os.path.isfile(subtitle_file):
+        os.remove(subtitle_file)
