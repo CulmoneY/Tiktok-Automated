@@ -36,3 +36,6 @@ imagemagick should be installed separately (not using pip). After installation, 
 	- concatenate the clips
 	- subtitle the concatenation
 	- upload to tiktok
+
+# TODO:
+- Make font size a function of its dimensions
