@@ -26,13 +26,13 @@ def os_concatenate(clip1_path: str, clip2_path: str, part: int, duration: float 
     # export to a temp file
     background.write_videofile("temp/temp.mp4", fps=1)
     # rescale and crop the clips
-    os.system(f"ffmpeg -y -i {clip1_path} -vf scale=1366:768,crop=1080:768:143:0 -codec:v copy -r 30 temp/clip1_cropped.mp4")
-    os.system(f"ffmpeg -y -i {clip2_path} -vf scale=1366:768,crop=1080:768:143:0 -codec:v copy -r 30 temp/clip2_cropped.mp4")
+    os.system(f"ffmpeg -y -i {clip1_path} -vf scale=1366:768,crop=1080:768:143:0 -codec:a copy -r 30 temp/clip1_cropped.mp4")
+    os.system(f"ffmpeg -y -i {clip2_path} -vf scale=1366:768,crop=1080:768:143:0 -codec:a copy -r 30 temp/clip2_cropped.mp4")
     # concatenate the clips
     # directory = os.path.dirname(os.path.realpath("videoeditor.py"))
     # os.system(f"cd /d {directory}")
     os.system(f'ffmpeg -y -i temp/temp.mp4 -i temp/clip1_cropped.mp4 -i temp/clip2_cropped.mp4 -i temp/temp.mp4 '
-              f'-filter_complex "[0:v][1:v]vstack=inputs=4[v]" -map "[v]" -map 1:a -codec:v copy -r 30 output{part}.mp4')
+              f'-filter_complex "[0:v][1:v]vstack=inputs=4[v]" -map "[v]" -map 1:a -codec:a copy -r 30 output{part}.mp4')
     # clean up temp files
     if os.path.isfile("temp/temp.mp4") and os.path.isfile("temp/clip1_cropped.mp4") and os.path.isfile("temp/clip2_cropped.mp4"):
         os.remove("temp/temp.mp4")
