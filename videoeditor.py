@@ -53,11 +53,11 @@ def os_movie_splitter(movie_path: str):
     duration = float(process.stdout.strip())
 
     # Get Font Size
-    command = "ffprobe -v error -select_streams v:0 -show_entries stream=width -of default=nw=1:nk=1 videos/video.mp4"
+    command = f"ffprobe -v error -select_streams v:0 -show_entries stream=width -of default=nw=1:nk=1 {movie_path}"
     process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                              universal_newlines=True)
     resolution = float(process.stdout.strip())
-    font_size = math.ceil(resolution / 25)
+    font_size = math.ceil(resolution / 16)
 
 
     num_parts = math.ceil(duration / 61)
