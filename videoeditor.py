@@ -14,16 +14,15 @@ from moviepy.editor import *
 import os
 
 
-def os_concatenate(clip1_path: str, clip2_path: str, part: int):
+def os_concatenate(clip1_path: str, clip2_path: str, part: int, duration: float = 61.0):
     """
     acts like concatenate_clips but uses os.system to call ffmpeg to concatenate the clips
     :param clip1_path:
     :param clip2_path:
     :return:
     """
-    t = 61
     # create a black background
-    background = ColorClip(size=(1080, 192), color=(0, 0, 0), duration=t)
+    background = ColorClip(size=(1080, 192), color=(0, 0, 0), duration=duration)
     # export to a temp file
     background.write_videofile("temp/temp.mp4", fps=1)
     # rescale and crop the clips
@@ -97,7 +96,7 @@ def os_movie_splitter(movie_path: str):
     get_brainrot(duration - (61 * (num_parts - 1)), num_parts)
 
     # Concatenate
-    os_concatenate(f'temp/part_{num_parts}.mp4', f'temp/brainrot{num_parts}.mp4', num_parts)
+    os_concatenate(f'temp/part_{num_parts}.mp4', f'temp/brainrot{num_parts}.mp4', num_parts, duration - (61 * (num_parts - 1)))
     if os.path.isfile(f'temp/part_{num_parts}.mp4') and os.path.isfile(f'temp/brainrot{num_parts}.mp4'):
         os.remove(f'temp/part_{num_parts}.mp4')
         os.remove(f'temp/brainrot{num_parts}.mp4')
