@@ -29,8 +29,6 @@ def os_concatenate(clip1_path: str, clip2_path: str, part: int, duration: float 
     os.system(f"ffmpeg -y -i {clip1_path} -vf scale=1366:768,crop=1080:768:143:0 -codec:a copy -r 30 temp/clip1_cropped.mp4")
     os.system(f"ffmpeg -y -i {clip2_path} -vf scale=1366:768,crop=1080:768:143:0 -codec:a copy -r 30 temp/clip2_cropped.mp4")
     # concatenate the clips
-    # directory = os.path.dirname(os.path.realpath("videoeditor.py"))
-    # os.system(f"cd /d {directory}")
     os.system(f'ffmpeg -y -i temp/temp.mp4 -i temp/clip1_cropped.mp4 -i temp/clip2_cropped.mp4 -i temp/temp.mp4 '
               f'-filter_complex "[0:v][1:v]vstack=inputs=4[v]" -map "[v]" -map 1:a -codec:a copy -r 30 outputs/output{part}.mp4')
     # clean up temp files
@@ -38,8 +36,7 @@ def os_concatenate(clip1_path: str, clip2_path: str, part: int, duration: float 
         os.remove("temp/temp.mp4")
         os.remove("temp/clip1_cropped.mp4")
         os.remove("temp/clip2_cropped.mp4")
-    else:
-        print('File does not exist.')
+    run(f'outputs/output{part}.mp4')
 
 
 def os_movie_splitter(movie_path: str):

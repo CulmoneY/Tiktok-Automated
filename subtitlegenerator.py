@@ -85,13 +85,11 @@ def generate_subtitle_file(language, segments):
         text += f"{segment['text']} \n"
         text += "\n"
 
-    f = open(subtitle_file, "w")
-    f.write(text)
-    f.close()
-
+    with open(subtitle_file, "w", encoding='utf-8') as f:
+        f.write(text)
     return subtitle_file
 
-def run(inputfile: str):
+def run(inputfile: str): # TODO: RENAME THIS
     select_input(inputfile)
     extracted_audio = extract_audio()
     segments, language = transcribe(audio=extracted_audio)
@@ -100,6 +98,8 @@ def run(inputfile: str):
     else:
         print('File does not exist.')
     subtitle_file = generate_subtitle_file(language, segments)
-    os.system(f'ffmpeg -y -i {inputfile} -vf "subtitles={subtitle_file}:force_style=\'MarginV=145,MarginH=0,Alignment=6,Fontsize=8\'" {inputfile.replace(".mp4", "")}.mp4')
+    os.system(f'ffmpeg -y -i {inputfile} -vf "subtitles={subtitle_file}:force_style=\'MarginV=145,MarginH=0,Alignment=6,Fontsize=8\'" {inputfile.replace(".mp4", "")}_subtitled.mp4')
     if os.path.isfile(subtitle_file):
         os.remove(subtitle_file)
+    if os.path.isfile(inputfile):
+        os.remove(inputfile)
