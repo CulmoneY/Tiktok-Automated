@@ -58,12 +58,37 @@ def os_movie_splitter(movie_path: str):
         # spilt into the 61-second segment
         start = format_time(61 * (part - 1))
         os.system(f'ffmpeg -y -ss {start} -i {movie_path} -t 00:01:01 -map 0 -r 30 temp/temppart_{part}.mp4')
-        os.system(f"")
+
+        command = (
+            f'ffmpeg -y -i temp/temppart_{part}.mp4 -vf '
+            f'"drawtext=fontfile=fonts/built_titling.otf:text=\'Part {part}\':'
+            f'fontcolor=white:fontsize=24:box=1:boxcolor=black@0.5:boxborderw=5:'
+            f'x=(w-text_w)/2:y=30:enable=\'between(t,0,5)\'" -codec:a copy -r 30 part_{part}.mp4'
+        )
+        os.system(command)
+        if os.path.isfile(f'temp/temppart_{part}.mp4'):
+            os.remove(f'temp/temppart_{part}.mp4')
+
+        # Get the Parkour Video
+        get_brainrot(61, part)
 
     # for the remaining portion of the video
     final_start = format_time(61 * (num_parts - 1))
     final_duration = format_time(duration - (61 * (num_parts - 1)))
-    os.system(f'ffmpeg -y -ss {final_start} -i {movie_path} -t {final_duration} -map 0 -r 30 part_{num_parts}.mp4')
+    os.system(f'ffmpeg -y -ss {final_start} -i {movie_path} -t {final_duration} -map 0 -r 30 temp/temppart_{num_parts}.mp4')
+
+    command = (
+        f'ffmpeg -y -i temp/temppart_{num_parts}.mp4 -vf '
+        f'"drawtext=fontfile=fonts/built_titling.otf:text=\'Final\':'
+        f'fontcolor=white:fontsize=24:box=1:boxcolor=black@0.5:boxborderw=5:'
+        f'x=(w-text_w)/2:y=30:enable=\'between(t,0,5)\'" -codec:a copy -r 30 part_{num_parts}.mp4'
+    )
+    os.system(command)
+    if os.path.isfile(f'temp/temppart_{num_parts}.mp4'):
+        os.remove(f'temp/temppart_{num_parts}.mp4')
+
+    # Get the Parkour Video
+    get_brainrot(duration - (61 * (num_parts - 1)), num_parts)
 
 
 def format_time(seconds: float) -> str:
@@ -104,7 +129,7 @@ def concatenate_clips(clip1_path: str, clip2_path: str):
     final_clip.write_videofile("my_stack2.mp4", fps=30)
 
 
-def movie_splitter(filename: str):
+def movie_splitter(filename: str): # TODO: Delete this
     """Spilts the given video into multiple 61 second parts. Each clip is labeled with its respective part number.
 
     Args:
@@ -137,41 +162,41 @@ def movie_splitter(filename: str):
 
     result = CompositeVideoClip([video_part, txt_clip])
     result.set_duration(video_part.duration).write_videofile(f"part_{num_parts}.mp4")
-    parkour_part.set_duration(video_part.duration).write_videofile(f"part_{num_parts}parkour.mp4")
+    parkour_part.set_duration(video_part.duration).write_videofile(f"part_{num_parts}parkour.mp4") # R # TODO: Delete
 
 
-def get_brainrot(duration: float) -> VideoFileClip:
+def get_brainrot(duration: float, part: int):
     """Returns a tiktok brainrot complilation the exact same duration as the specified value. Each 61 second segments will be a different
-    random segment
-    The videos within brainrot are labelled in sequential order {ex: 1, 2, 3 ...}
+    random segment.
+    The videos within brainrot are labelled in sequential order {ex: brainrot_1, brainrot_2, brainrot_3 ...}
+    Preconditions:
+        - 0 < duration <= 61
     """
     # # How many files are in brainrot
-    # directory = 'brainrot/'
-    # entries = os.listdir(directory)
-    # # Define a tuple of video file extensions
-    # video_extensions = ('.mp4', '.avi', '.mov', '.mkv')
-    # file_count = sum(
-    #     1 for entry in entries if entry.endswith(video_extensions) and os.path.isfile(os.path.join(directory, entry)))
+    directory = 'brainrot/'
+    entries = os.listdir(directory)
+    # Define a tuple of video file extensions
+    video_extensions = ('.mp4', '.avi', '.mov', '.mkv')
+    file_count = sum(
+        1 for entry in entries if entry.endswith(video_extensions) and os.path.isfile(os.path.join(directory, entry)))
+    duration = min(duration, 61)
 
-    videos = []
-    numclips = math.ceil(duration / 61)
-    for _ in range(numclips):
-        # Select the random video
-        # video_name = f'brainrot/{random.randint(1, file_count)}'
-        video_name = 'brainrot/output2.mp4'
-        segment = get_61segment(VideoFileClip(video_name))
-        videos.append(segment)
-    final_video = concatenate_videoclips(videos).set_duration(duration)
-    return final_video
+    # Create dictionary mapping of all files in brainrot folder
+    videos = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f)) and f.endswith(video_extensions)]
+    videos = {i: f for i, f in enumerate(videos)}
+    video_path = 'brainrot/' + videos[random.randint(0, file_count - 1)]
+    get_61segment(video_path, part, duration)
 
-
-def get_61segment(video: VideoFileClip) -> VideoFileClip:
+def get_61segment(video_path: str, part: int, duration: float):
     """Acts as a helper function to get_brainrot, and returns a 61-second segment of the given video"""
-    maximimum_start = int(video.duration - 61)
-    starttime = random.randrange(0, maximimum_start)
-    segment = video.subclip(starttime, starttime + 61)
-    return segment
-
+    command = f'ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 {video_path}'
+    process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                             universal_newlines=True)
+    duration_video = float(process.stdout.strip())
+    maximimum_start = format_time(int(duration_video - duration))
+    starttime = format_time(random.randrange(0, int(duration_video - duration)))
+    duration = format_time(duration)
+    os.system(f'ffmpeg -y -ss {starttime} -i {video_path} -t {duration} -map 0 -codec:v copy -r 30 temp/brainrot{part}.mp4')
 
 
 
