@@ -63,7 +63,7 @@ def os_movie_splitter(movie_path: str):
             f'ffmpeg -y -i temp/temppart_{part}.mp4 -vf '
             f'"drawtext=fontfile=fonts/built_titling.otf:text=\'Part {part}\':'
             f'fontcolor=white:fontsize=24:box=1:boxcolor=black@0.5:boxborderw=5:'
-            f'x=(w-text_w)/2:y=30:enable=\'between(t,0,5)\'" -codec:a copy -r 30 part_{part}.mp4'
+            f'x=(w-text_w)/2:y=30:enable=\'between(t,0,5)\'" -codec:v -r 30 part_{part}.mp4'
         )
         os.system(command)
         if os.path.isfile(f'temp/temppart_{part}.mp4'):
@@ -81,7 +81,7 @@ def os_movie_splitter(movie_path: str):
         f'ffmpeg -y -i temp/temppart_{num_parts}.mp4 -vf '
         f'"drawtext=fontfile=fonts/built_titling.otf:text=\'Final\':'
         f'fontcolor=white:fontsize=24:box=1:boxcolor=black@0.5:boxborderw=5:'
-        f'x=(w-text_w)/2:y=30:enable=\'between(t,0,5)\'" -codec:a copy -r 30 part_{num_parts}.mp4'
+        f'x=(w-text_w)/2:y=30:enable=\'between(t,0,5)\'" -codec:v copy -r 30 part_{num_parts}.mp4'
     )
     os.system(command)
     if os.path.isfile(f'temp/temppart_{num_parts}.mp4'):
