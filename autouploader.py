@@ -19,17 +19,18 @@ from webdriver_manager.chrome import ChromeDriverManager as CM
 # time.sleep(4)
 
 options = webdriver.ChromeOptions()
+options.add_argument("user-data-dir=C:\\Users\\omidh\\AppData\\Local\\Google\\Chrome\\User Data")
 RemoteConnection.set_timeout(30)
 bot = webdriver.Chrome(options=options,  executable_path=CM().install())
 bot.set_window_size(1680, 900)
 
-bot.get('https://www.tiktok.com/login')
-ActionChains(bot).key_down(Keys.CONTROL).send_keys(
-    '-').key_up(Keys.CONTROL).perform()
-ActionChains(bot).key_down(Keys.CONTROL).send_keys(
-    '-').key_up(Keys.CONTROL).perform()
-print('Waiting 50s for manual login...')
-time.sleep(50)
+# bot.get('https://www.tiktok.com/login')
+# ActionChains(bot).key_down(Keys.CONTROL).send_keys(
+#     '-').key_up(Keys.CONTROL).perform()
+# ActionChains(bot).key_down(Keys.CONTROL).send_keys(
+#     '-').key_up(Keys.CONTROL).perform()
+# print('Waiting 50s for manual login...')
+# time.sleep(50)
 bot.get('https://www.tiktok.com/upload/?lang=en')
 time.sleep(3)
 
@@ -45,13 +46,19 @@ def check_exists_by_xpath(driver, xpath):
 
 def upload(video_path):
     while True:
-        file_uploader = bot.find_element_by_xpath(
-            '//*[@id="main"]/div[2]/div/div[2]/div[2]/div/div/input')
+        time.sleep(1.5)
+        # WebDriverWait(bot, 20).until(
+        #     EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/div/div/div/div[1]/div/div/div/div[1]/div/div/div[2]/div[3]/button[1]')))
+        # file_uploader = bot.find_element_by_xpath(
+        #     "/html/body/div[1]/div/div/div/div[1]/div/div/div/div[1]/div/div/div[2]/div[3]/button[1]")
+        iframe = bot.find_element_by_xpath('//iframe[@data-tt="Upload_index_iframe"]')
+        bot.switch_to.frame(iframe)
+        file_uploader = bot.find_element_by_xpath("//input[@type='file']")
 
         file_uploader.send_keys(video_path)
-
+        time.sleep(2)
         caption = bot.find_element_by_xpath(
-            '//*[@id="main"]/div[2]/div/div[2]/div[3]/div[1]/div[1]/div[2]/div/div[1]/div/div/div/div/div/div/span')
+            "//div[@contenteditable='true']")
 
         bot.implicitly_wait(10)
         ActionChains(bot).move_to_element(caption).click(
@@ -74,31 +81,35 @@ def upload(video_path):
 
         post = WebDriverWait(bot, 100).until(
             EC.visibility_of_element_located(
-                (By.XPATH, '//*[@id="main"]/div[2]/div/div[2]/div[3]/div[5]/button[2]')))
+                (By.XPATH, "//div[text()='Post']")))
 
         post.click()
-        time.sleep(30)
 
-        if check_exists_by_xpath(bot, '//*[@id="portal-container"]/div/div/div[1]/div[2]'):
-            reupload = WebDriverWait(bot, 100).until(EC.visibility_of_element_located(
-                (By.XPATH, '//*[@id="portal-container"]/div/div/div[1]/div[2]')))
+        # post = WebDriverWait(bot, 100).until(
+        #     EC.visibility_of_element_located(
+        #         (By.XPATH, "//div[text()='Upload']")))
+        # time.sleep(30)
 
-            reupload.click()
-        else:
-            print('Unknown error cooldown')
-            while True:
-                time.sleep(600)
-                post.click()
-                time.sleep(15)
-                if check_exists_by_xpath(bot, '//*[@id="portal-container"]/div/div/div[1]/div[2]'):
-                    break
-
-        if check_exists_by_xpath(bot, '//*[@id="portal-container"]/div/div/div[1]/div[2]'):
-            reupload = WebDriverWait(bot, 100).until(EC.visibility_of_element_located(
-                (By.XPATH, '//*[@id="portal-container"]/div/div/div[1]/div[2]')))
-            reupload.click()
-
-        time.sleep(1)
+        # if check_exists_by_xpath(bot, '//*[@id="portal-container"]/div/div/div[1]/div[2]'):
+        #     reupload = WebDriverWait(bot, 100).until(EC.visibility_of_element_located(
+        #         (By.XPATH, '//*[@id="portal-container"]/div/div/div[1]/div[2]')))
+        #
+        #     reupload.click()
+        # else:
+        #     print('Unknown error cooldown')
+        #     while True:
+        #         time.sleep(600)
+        #         post.click()
+        #         time.sleep(15)
+        #         if check_exists_by_xpath(bot, '//*[@id="portal-container"]/div/div/div[1]/div[2]'):
+        #             break
+        #
+        # if check_exists_by_xpath(bot, '//*[@id="portal-container"]/div/div/div[1]/div[2]'):
+        #     reupload = WebDriverWait(bot, 100).until(EC.visibility_of_element_located(
+        #         (By.XPATH, '//*[@id="portal-container"]/div/div/div[1]/div[2]')))
+        #     reupload.click()
+        #
+        # time.sleep(1)
 
 
 # ================================================================
