@@ -11,12 +11,12 @@ from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import NoSuchElementException
 from webdriver_manager.chrome import ChromeDriverManager as CM
 
-print('=====================================================================================================')
-print('Heyy, you have to login manully on tiktok, so the bot will wait you 1 minute for loging in manually!')
-print('=====================================================================================================')
-time.sleep(8)
-print('Running bot now, get ready and login manually...')
-time.sleep(4)
+# print('=====================================================================================================')
+# print('Heyy, you have to login manully on tiktok, so the bot will wait you 1 minute for loging in manually!')
+# print('=====================================================================================================')
+# time.sleep(8)
+# print('Running bot now, get ready and login manually...')
+# time.sleep(4)
 
 options = webdriver.ChromeOptions()
 RemoteConnection.set_timeout(30)
