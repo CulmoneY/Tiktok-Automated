@@ -3,6 +3,7 @@ import random
 import requests
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.remote.remote_connection import RemoteConnection
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support import expected_conditions as EC
@@ -18,6 +19,7 @@ print('Running bot now, get ready and login manually...')
 time.sleep(4)
 
 options = webdriver.ChromeOptions()
+RemoteConnection.set_timeout(30)
 bot = webdriver.Chrome(options=options,  executable_path=CM().install())
 bot.set_window_size(1680, 900)
 
@@ -102,5 +104,5 @@ def upload(video_path):
 # ================================================================
 # Here is the path of the video that you want to upload in tiktok.
 # Plese edit the path because this is different to everyone.
-upload(r"C:\Users\Gaming\OneDrive\Documents\GitHub\Tiktok-Automated\outputs")
+upload(r"G:\omidh\Documents\Github\Tiktok-Automated\outputs\output1_subtitled.mp4")
 # ================================================================
