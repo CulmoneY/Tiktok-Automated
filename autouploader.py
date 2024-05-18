@@ -102,5 +102,5 @@ def upload(video_path):
 # ================================================================
 # Here is the path of the video that you want to upload in tiktok.
 # Plese edit the path because this is different to everyone.
-upload(r"C:\Users\redi\Videos\your-video-here.mov")
+upload(r"C:\Users\Gaming\OneDrive\Documents\GitHub\Tiktok-Automated\outputs")
 # ================================================================
