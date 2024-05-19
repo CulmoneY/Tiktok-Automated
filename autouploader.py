@@ -20,6 +20,7 @@ from webdriver_manager.chrome import ChromeDriverManager as CM
 
 options = webdriver.ChromeOptions()
 options.add_argument("user-data-dir=C:\\Users\\omidh\\AppData\\Local\\Google\\Chrome\\User Data")
+options.add_argument("--auto-open-devtools-for-tabs")
 RemoteConnection.set_timeout(30)
 bot = webdriver.Chrome(options=options,  executable_path=CM().install())
 bot.set_window_size(1680, 900)
@@ -61,10 +62,17 @@ def upload(video_path):
             "//div[@contenteditable='true']")
 
         bot.implicitly_wait(10)
-        ActionChains(bot).move_to_element(caption).click(
-            caption).perform()
+        bot.execute_script("arguments[0].scrollIntoView(true);", caption)  # scrolls into view of caption
+        print('moved')
+        time.sleep(0.5)
+        # ActionChains(bot).move_to_element(caption).click(
+        #     caption).perform()
+
         # ActionChains(bot).key_down(Keys.CONTROL).send_keys(
         #     'v').key_up(Keys.CONTROL).perform()
+
+        bot.execute_script("arguments[0].click();", caption)
+
 
         with open(r"caption.txt", "r") as f:
             tags = [line.strip() for line in f]

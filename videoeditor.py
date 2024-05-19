@@ -13,8 +13,10 @@ from subtitlegenerator import run
 from moviepy.editor import *
 import os
 
+time_segment = 180
 
-def os_concatenate(clip1_path: str, clip2_path: str, part: int, duration: float = 61.0):
+
+def os_concatenate(clip1_path: str, clip2_path: str, part: int, duration: float = time_segment):
     """
     acts like concatenate_clips but uses os.system to call ffmpeg to concatenate the clips
     :param clip1_path:
@@ -41,7 +43,7 @@ def os_concatenate(clip1_path: str, clip2_path: str, part: int, duration: float 
 
 def os_movie_splitter(movie_path: str):
     """
-    splits the movie into 61 second parts
+    splits the movie into time_segment second parts
     :param movie_path:
     :return:
     """
@@ -57,11 +59,12 @@ def os_movie_splitter(movie_path: str):
     font_size = math.ceil(resolution / 16)
 
 
-    num_parts = math.ceil(duration / 61)
+    num_parts = math.ceil(duration / time_segment)
     for part in range(1, num_parts):
         # spilt into the 61-second segment
-        start = format_time(61 * (part - 1))
-        os.system(f'ffmpeg -y -ss {start} -i {movie_path} -t 00:01:01 -map 0 -r 30 temp/temppart_{part}.mp4')
+        start = format_time(time_segment * (part - 1))
+        length = format_time(time_segment)
+        os.system(f'ffmpeg -y -ss {start} -i {movie_path} -t {length} -map 0 -r 30 temp/temppart_{part}.mp4')
 
         command = (
             f'ffmpeg -y -i temp/temppart_{part}.mp4 -vf '
@@ -74,7 +77,7 @@ def os_movie_splitter(movie_path: str):
             os.remove(f'temp/temppart_{part}.mp4')
 
         # Get the Parkour Video
-        get_brainrot(61, part)
+        get_brainrot(time_segment, part)
 
         # Concatenate
         os_concatenate(f'temp/part_{part}.mp4', f'temp/brainrot{part}.mp4', part)
@@ -83,8 +86,8 @@ def os_movie_splitter(movie_path: str):
             os.remove(f'temp/brainrot{part}.mp4')
 
     # for the remaining portion of the video
-    final_start = format_time(61 * (num_parts - 1))
-    final_duration = format_time(duration - (61 * (num_parts - 1)))
+    final_start = format_time(time_segment * (num_parts - 1))
+    final_duration = format_time(duration - (time_segment * (num_parts - 1)))
     os.system(f'ffmpeg -y -ss {final_start} -i {movie_path} -t {final_duration} -map 0 -r 30 temp/temppart_{num_parts}.mp4')
 
     command = (
@@ -98,10 +101,10 @@ def os_movie_splitter(movie_path: str):
         os.remove(f'temp/temppart_{num_parts}.mp4')
 
     # Get the Parkour Video
-    get_brainrot(duration - (61 * (num_parts - 1)), num_parts)
+    get_brainrot(duration - (time_segment * (num_parts - 1)), num_parts)
 
     # Concatenate
-    os_concatenate(f'temp/part_{num_parts}.mp4', f'temp/brainrot{num_parts}.mp4', num_parts, duration - (61 * (num_parts - 1)))
+    os_concatenate(f'temp/part_{num_parts}.mp4', f'temp/brainrot{num_parts}.mp4', num_parts, duration - (time_segment * (num_parts - 1)))
     if os.path.isfile(f'temp/part_{num_parts}.mp4') and os.path.isfile(f'temp/brainrot{num_parts}.mp4'):
         os.remove(f'temp/part_{num_parts}.mp4')
         os.remove(f'temp/brainrot{num_parts}.mp4')
@@ -138,7 +141,7 @@ def get_brainrot(duration: float, part: int):
     video_extensions = ('.mp4', '.avi', '.mov', '.mkv')
     file_count = sum(
         1 for entry in entries if entry.endswith(video_extensions) and os.path.isfile(os.path.join(directory, entry)))
-    duration = min(duration, 61)
+    duration = min(duration, time_segment)
 
     # Create dictionary mapping of all files in brainrot folder
     videos = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f)) and f.endswith(video_extensions)]
@@ -168,3 +171,10 @@ def subtitles(captions: list) -> list:
         txt_clip = txt_clip.set_start(start_time).set_duration(end_time - start_time).set_position('center')
         text_clips.append(txt_clip)
     return text_clips
+
+def main():
+    videopath = input("Enter the path of the video: ")
+    os_movie_splitter(videopath)
+
+if __name__ == "__main__":
+    main()
