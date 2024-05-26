@@ -6,3 +6,8 @@ requests==2.25.0
 selenium==3.141.0
 urllib3==1.26.2
 webdriver_manager
+
+
+# requires gcloud CLI https://cloud.google.com/sdk/docs/install
+# requires google cloud text to speech API
+

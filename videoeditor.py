@@ -9,7 +9,8 @@ A watermark is also added to each clip. The processed clips are saved as mp4 fil
 import math
 import random
 import subprocess
-from subtitlegenerator import run
+from stablegenerator import run
+# from subtitlegenerator import run
 from moviepy.editor import *
 import os
 
@@ -38,7 +39,7 @@ def os_concatenate(clip1_path: str, clip2_path: str, part: int, duration: float 
         os.remove("temp/temp.mp4")
         os.remove("temp/clip1_cropped.mp4")
         os.remove("temp/clip2_cropped.mp4")
-    run(f'outputs/output{part}.mp4')
+    run(f'outputs/output{part}.mp4', True)
 
 
 def os_movie_splitter(movie_path: str):
