@@ -10,17 +10,24 @@ def story_maker(title: str, text: str):
     duration = 0
     tts(title, 'temp/titletts')
     tts(text, 'temp/texttts')
-    if os.path.isfile("temp/titletts") and os.path.isfile("temp/texttts"):
-        command = f'ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 temp/titletts'
+    if os.path.isfile("temp/titletts.mp3") and os.path.isfile("temp/texttts.mp3"):
+        command = f'ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 temp/titletts.mp3'
         process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                  universal_newlines=True)
-        duration = float(process.stdout.strip()) + 1 #The plus 1 is for a space between the title and video itself
+        title_duration  = float(process.stdout.strip())
 
-        command = f'ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 temp/texttts'
+        command = f'ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 temp/texttts.mp3'
         process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                  universal_newlines=True)
-        duration += float(process.stdout.strip())
+        duration = float(process.stdout.strip()) + title_duration + 1 # The plus 1 is for a space between the title and video itself
+
     get_background(duration)
+
+def import_title(title: str, title_duration: float):
+    """Adds a title screen to the given background on the correct portion of the video. Correctly formats the name of the title to fit within the specified image"""
+    if not os.path.isfile("temp/background.mp4"):
+        pass
+    os.system(f"ffmpeg -y -i temp/background.mp4 -i videos/title.png -filter_complex [0][1]overlay=x=(main_w-overlay_w)/2:y=(main_h-overlay_h)/2:enable=\'between(t,0,{title_duration})\' -r 30 temp/output.mp4")
 
 
 def get_background(duration: float):
