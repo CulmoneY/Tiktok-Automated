@@ -3,10 +3,11 @@ import random
 from texttospeech import tts
 import os
 import subprocess
+from stablegenerator import run
 
 text = "I woke up to a blinking notification on my phone: one unread message from my dad. It was strange since he had passed away over a year ago."
 
-
+# TODO: Remove/reformat text to not contain quotation marks and colons
 def story_maker(title: str, text: str):
     """"""
     duration, title_duration = 0, 0
@@ -27,18 +28,40 @@ def story_maker(title: str, text: str):
     get_background(duration)
     import_title(title, title_duration)
     add_audio(title_duration)
+    run('temp/audiovideo.mp4', segment_level=False, title_duration=title_duration+0.90)
 
 
 def add_audio(title_duration):
     """Adds the audio to the current titled background.
     The First audio plays instantly, the second plays 1 second later"""
+    # os.system("ffmpeg -y -i temp/titlefinal.mp4 -i temp/titletts.mp3 -map 0:v "
+    #           "-map 1:a -c:v copy -c:a aac -strict experimental temp/intermediate_video.mp4")
+    # os.system(f"ffmpeg -y -i temp/intermediate_video.mp4 -i temp/texttts.mp3 -filter_complex"
+    #           f" \"[1:a]adelay={title_duration + 1}s|{title_duration + 1}"
+    #           f"s[a2]; [0:a][a2]amix=inputs=2:duration=longest[a]\" "
+    #           f"-map 0:v -map \"[a]\" -c:v copy -c:a aac -strict experimental temp/audiovideo.mp4")
+
+    # Convert title_duration from seconds to milliseconds and add 1 second gap
+    delay = int((title_duration + 1) * 1000)
+
+    # Add the first audio file
     os.system("ffmpeg -y -i temp/titlefinal.mp4 -i temp/titletts.mp3 -map 0:v "
-              "-map 1:a -c:v copy -c:a aac -strict experimental temp/intermediate_video.mp4")
-    os.system(f"ffmpeg -y -i temp/intermediate_video.mp4 -i temp/texttts.mp3 -filter_complex"
-              f" \"[1:a]adelay={title_duration + 1}s|{title_duration + 1}"
-              f"s[a2]; [0:a][a2]amix=inputs=2:duration=longest[a]\" "
+              "-map 1:a -c:v copy -c:a aac -strict experimental temp/intermediate_video_with_title_audio.mp4")
+
+    # Add the second audio file with delay
+    os.system(f"ffmpeg -y -i temp/intermediate_video_with_title_audio.mp4 -i temp/texttts.mp3 -filter_complex"
+              f" \"[1:a]adelay={delay}|{delay}[a2]; [0:a][a2]amix=inputs=2:duration=longest[a]\" "
               f"-map 0:v -map \"[a]\" -c:v copy -c:a aac -strict experimental temp/audiovideo.mp4")
-    #TODO: Remove the temp audio files, aswell the temp titlefinal
+
+    # Clean up temp files
+    if os.path.isfile('temp/titletts.mp3'):
+        os.remove('temp/titletts.mp3')
+    if os.path.isfile('temp/texttts.mp3'):
+        os.remove('temp/texttts.mp3')
+    if os.path.isfile('temp/intermediate_video_with_title_audio.mp4'):
+        os.remove('temp/intermediate_video_with_title_audio.mp4')
+    if os.path.isfile('temp/titlefinal.mp4'):
+        os.remove('temp/titlefinal.mp4')
 
 
 def expand_text(text: str) -> str:
@@ -56,7 +79,9 @@ def import_title(title: str, title_duration: float):
         f"ffmpeg -y -i temp/background.mp4 -i videos/title.png -filter_complex [0][1]overlay=x=(main_w-overlay_w)/2:y=(main_h-overlay_h)/2:enable=\'between(t,0,{title_duration})\' -r 30 temp/title.mp4")
 
     # Add the text
-    #TODO: Delete background file
+    if os.path.isfile('temp/background.mp4'):
+        os.remove('temp/background.mp4')
+
     title1, title2, title3, = format_text(title)
     command = (
         f'ffmpeg -y -i temp/title.mp4 -vf '
