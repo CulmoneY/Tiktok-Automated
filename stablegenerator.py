@@ -48,7 +48,7 @@ def transcribe(audio: str, segment_level: bool):
     Transcribes the given audio file.
     """
     model = stable_whisper.load_model('base')
-    result = model.transcribe(audio)
+    result = model.transcribe(audio, language="en")
     result.to_srt_vtt(filepath='temp/subtitles.srt', segment_level=segment_level, word_level=True, tag=('<font color="#fce803">', '</font>'))
 
 

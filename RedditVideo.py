@@ -102,8 +102,6 @@ def import_title(title: str, title_duration: float):
 
 def format_text(title: str) -> tuple:
     """Acts as a helper function to import_title, spilting the longer title into 3 seperate parts
-    preconditions:
-        len(title) <= 300
     """
     words = title.split()
     lines = {1: '', 2: '', 3: ''}
