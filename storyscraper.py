@@ -7,14 +7,18 @@ import requests
 import json
 import os
 from unidecode import unidecode
+import re
+
+# number of stories to get
+n = 20
 
 
 def scrape_stories() -> dict:
     """
     Scrapes stories from a predetermined multireddit.
     """
-    data = requests.get("https://www.reddit.com/r/AmItheAsshole+MaliciousCompliance+nosleep+tifu"
-                        "/.json?count=20/?sort=top&t=week/").json()
+    link = f"https://www.reddit.com/r/AmItheAsshole+MaliciousCompliance+nosleep+tifu/.json?count={n}/?sort=top&t=week/"
+    data = requests.get(link).json()
     return data
 
 
@@ -24,8 +28,8 @@ def filter_stories(data: dict) -> list[dict]:
     :param data:
     :return:
     """
-    # TODO: needs to filter out \n and &amp;
-    # TODO: also remove any stories that are not text based
+    # TODO: Remove stories that are too short (len)
+    # TODO: Remove links from stories (replace entire word with https://, and change it to the word 'link')
     stories = []
     for post in data['data']['children']:
         title = post['data']['title']
@@ -42,12 +46,26 @@ def filter_text(text: str) -> str:
     :param text:
     :return:
     """
-    text = text.replace('\n', '')
-    text = text.replace('\"', '')
-    text = text.replace(':', '')
     text = text.replace('&amp;', 'and')
     text = text.replace('u2026', '...')
+
+    translation_table = str.maketrans({
+        ';': '',
+        '/': '',
+        r'\ '[0]: '',
+        '\n': '',
+        '\"': '',
+        ':': '',
+        "'": '',
+    })
+
+    text = text.translate(translation_table)
+
+    # Normalize Unicode characters to ASCII
     text = unidecode(text)
+
+    # Remove any remaining unwanted characters using regex
+    text = re.sub(r'[^\x00-\x7F]+', '', text)
     return text
 
 
@@ -64,7 +82,7 @@ def save_stories(stories: list[dict], file_path: str):
         json.dump(stories, file)
 
 
-def run(file_path: str = 'temp/stories.json'):
+def gather_n_stories(file_path: str = 'temp/stories.json'):
     """
     Main function to scrape stories from a predetermined multireddit.
     :param file_path:
@@ -73,5 +91,6 @@ def run(file_path: str = 'temp/stories.json'):
     data = scrape_stories()
     stories = filter_stories(data)
     save_stories(stories, file_path)
+    return stories
 
 

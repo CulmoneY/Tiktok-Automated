@@ -52,7 +52,7 @@ def transcribe(audio: str, segment_level: bool):
     result.to_srt_vtt(filepath='temp/subtitles.srt', segment_level=segment_level, word_level=True, tag=('<font color="#fce803">', '</font>'))
 
 
-def run(input_path: str, segment_level: bool = True, title_duration: float = 0.0):
+def run(input_path: str, segment_level: bool = True, title_duration: float = 0.0, n: int = 0):
     """
     Main function to apply subtitles to a video.
     :param input_path:
@@ -68,9 +68,9 @@ def run(input_path: str, segment_level: bool = True, title_duration: float = 0.0
     subtitle_file = 'temp/subtitles.srt'
     if not segment_level:
         os.system(
-            f'ffmpeg -y -i {input_path} -vf "subtitles={subtitle_file}:force_style=\'FontName=Impact,MarginV=145,MarginH=0,Alignment=6,Fontsize=20\'" {input_path.replace(".mp4", "")}_subtitled.mp4')
+            f'ffmpeg -y -i {input_path} -vf "subtitles={subtitle_file}:force_style=\'FontName=Impact,MarginV=145,MarginH=0,Alignment=6,Fontsize=20\'" {input_path.replace(".mp4", "")}_subtitled{n}.mp4')
     else:
-        os.system(f'ffmpeg -y -i {input_path} -vf "subtitles={subtitle_file}:force_style=\'FontName=Impact,MarginV=145,MarginH=0,Alignment=6,Fontsize=8\'" {input_path.replace(".mp4", "")}_subtitled.mp4')
+        os.system(f'ffmpeg -y -i {input_path} -vf "subtitles={subtitle_file}:force_style=\'FontName=Impact,MarginV=145,MarginH=0,Alignment=6,Fontsize=8\'" {input_path.replace(".mp4", "")}_subtitled{n}.mp4')
     if os.path.isfile(subtitle_file):
         os.remove(subtitle_file)
     if os.path.isfile(input_path):

@@ -19,7 +19,7 @@ def tts(text: str, output_path: str):
     voice = texttospeech.VoiceSelectionParams(
         # language_code="en-US", name="en-US-Standard-B", ssml_gender='MALE'
         # language_code = "cmn-cn", name = "cmn-cn-Standard-A", ssml_gender = 'FEMALE'
-        language_code="en-US", name="en-US-Journey-D", ssml_gender='MALE'
+        language_code="en-US", name="en-US-Journey-O", ssml_gender='FEMALE'
     )
 
     # Select the type of audio file you want returned
@@ -40,6 +40,6 @@ def tts(text: str, output_path: str):
         out.write(response.audio_content)
         print(f'Audio content written to file "{output_path}.mp3"')
 
-    os.system(f"ffmpeg -y -i {output_path}_slow.mp3 -filter:a \"atempo=1.35\" {output_path}.mp3")
+    os.system(f"ffmpeg -y -i {output_path}_slow.mp3 -filter:a \"atempo=1.05\" {output_path}.mp3")
     if os.path.isfile(output_path + "_slow.mp3"):
         os.remove(output_path + "_slow.mp3")
