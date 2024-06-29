@@ -43,6 +43,8 @@ def filter_text(text: str) -> str:
     :return:
     """
     text = text.replace('\n', '')
+    text = text.replace('\"', '')
+    text = text.replace(':', '')
     text = text.replace('&amp;', 'and')
     text = text.replace('u2026', '...')
     text = unidecode(text)
