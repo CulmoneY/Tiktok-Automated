@@ -48,8 +48,8 @@ def story_maker(title: str, text: str, n: int = 0):
     os.system(f"ffmpeg -y -i temp/audiovideo_subtitled{n}.mp4 -vf "
               f"crop=0.31640625*in_w:in_h:0.341796875*in_w:0 "
               f"-codec:a copy -r 30 stories/video{n}.mp4")
-    if os.path.isfile(f'temp/audiovideo_subtitled{n}.mp4'):
-        os.remove(f'temp/audiovideo_subtitled{n}.mp4')
+    # if os.path.isfile(f'temp/audiovideo_subtitled{n}.mp4'):
+    #     os.remove(f'temp/audiovideo_subtitled{n}.mp4')
     if os.path.isfile('temp/audio-tempaudiovideo.wav'):
         os.remove('temp/audio-tempaudiovideo.wav')
 
@@ -87,13 +87,15 @@ def add_audio(title_duration):
 
 def expand_text(text):
     """Rewrites the given text to expand the acronyms
-        For example TIL = Today I Learnt"""
+        For example TIL = Today I Learned"""
     acronyms = {
-        'TIL': "Today I Learnt",
+        'TIL': "Today I Learned",
         "AITA": "Am I the A-hole",
         "NTA": "Not the A-hole",
         "YTA": "You're the A-hole",
-        "TIFU": "Today I effed up"
+        "TIFU": "Today I effed up",
+        "WIBTA": "Would I be the A-hole",
+        "TA": "The A-hole"
     }
 
     pattern = re.compile(r'\b(' + '|'.join(re.escape(key) for key in acronyms.keys()) + r')\b')
@@ -109,25 +111,48 @@ def import_title(title: str, title_duration: float):
     formats the name of the title to fit within the specified image"""
     if not os.path.isfile("temp/background.mp4"):
         pass
-    os.system(
-        f"ffmpeg -y -i temp/background.mp4 -i videos/title.png -filter_complex [0][1]overlay=x=(main_w-overlay_w)/2:y=(main_h-overlay_h)/2:enable=\'between(t,0,{title_duration})\' -r 30 temp/title.mp4")
+    # Find the correct scale.
+    command = 'ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0:s=x temp/background.mp4'
+    process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                             universal_newlines=True)
+    background_dimensions = process.stdout.strip()
+
+    # Extract width and height from the output
+    background_width, background_height = map(int, background_dimensions.split('x'))
+
+    # Calculate the scaled dimensions
+    scaled_width = int(background_width * 0.21171875)
+    scaled_height = int(background_height * 0.17638888888)
+    print(f"The width and height are: {background_width} and {background_height}")
+    command = (
+        f"ffmpeg -y -i temp/background.mp4 -i videos/title.png "
+        f"-filter_complex "
+        f"[1:v]scale={scaled_width}:{scaled_height}[scaled_overlay];"
+        f"[0:v][scaled_overlay]overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2:enable='between(t,0,{title_duration})' "
+        f"-r 30 temp/title.mp4"
+    )
+    os.system(command)
 
     # Add the text
     if os.path.isfile('temp/background.mp4'):
         os.remove('temp/background.mp4')
-
+    font_size = round(0.02083333333 * background_height)
     title1, title2, title3, = format_text(title)
+    h1 = background_height/2 - 0.11811023622*scaled_height
+    h2 = background_height/2 + 0.01968503937*scaled_height
+    h3 = background_height/2 + 0.15748031496*scaled_height
+    w = background_width/2 - 0.45202952029*scaled_width
     command = (
         f'ffmpeg -y -i temp/title.mp4 -vf '
         f'"drawtext=fontfile=fonts/built_titling.otf:text=\'{title1}\':'
-        f'fontcolor=black:fontsize=30:'
-        f'x=w/2 - 245:y=h/2 - 30:enable=\'between(t,0,{title_duration})\'",'  # End of Text 1
+        f'fontcolor=black:fontsize={font_size}:'
+        f'x={w}:y={h1}:enable=\'between(t,0,{title_duration})\'",'  # End of Text 1
         f'"drawtext=fontfile=fonts/built_titling.otf:text=\'{title2}\':'
-        f'fontcolor=black:fontsize=30:'
-        f'x=w/2 - 245:y=h/2 + 5 :enable=\'between(t,0,{title_duration})\'",'  # End of Text 2
+        f'fontcolor=black:fontsize={font_size}:'
+        f'x={w}:y={h2}:enable=\'between(t,0,{title_duration})\'",'  # End of Text 2
         f'"drawtext=fontfile=fonts/built_titling.otf:text=\'{title3}\':'
-        f'fontcolor=black:fontsize=30:'
-        f'x=w/2 - 245:y=h/2 + 40:enable=\'between(t,0,{title_duration})\'" -codec:a copy -r 30 temp/titlefinal.mp4'
+        f'fontcolor=black:fontsize={font_size}:'
+        f'x={w}:y={h3}:enable=\'between(t,0,{title_duration})\'" -codec:a copy -r 30 temp/titlefinal.mp4'
     )
     os.system(command)
     if os.path.isfile('temp/title.mp4'):
