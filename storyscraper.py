@@ -17,7 +17,7 @@ def scrape_stories() -> dict:
     """
     Scrapes stories from a predetermined multireddit.
     """
-    link = f"https://www.reddit.com/r/AmItheAsshole+MaliciousCompliance+nosleep+tifu/.json?count={n}/?sort=top&t=week/"
+    link = f"https://www.reddit.com/r/AmItheAsshole+MaliciousCompliance+nosleep+tifu/top.json?limit={n}&t=week"
     data = requests.get(link).json()
     return data
 

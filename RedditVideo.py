@@ -49,8 +49,8 @@ def story_maker(title: str, text: str, n: int = 0):
     os.system(f"ffmpeg -y -i temp/audiovideo_subtitled{n}.mp4 -vf "
               f"crop=0.31640625*in_w:in_h:0.341796875*in_w:0 "
               f"-codec:a copy -r 30 stories/video{n}.mp4")
-    # if os.path.isfile(f'temp/audiovideo_subtitled{n}.mp4'):
-    #     os.remove(f'temp/audiovideo_subtitled{n}.mp4')
+    if os.path.isfile(f'temp/audiovideo_subtitled{n}.mp4'):
+        os.remove(f'temp/audiovideo_subtitled{n}.mp4')
     if os.path.isfile('temp/audio-tempaudiovideo.wav'):
         os.remove('temp/audio-tempaudiovideo.wav')
 
