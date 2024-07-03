@@ -5,12 +5,13 @@ import os
 import subprocess
 from stablegenerator import run
 from storyscraper import gather_n_stories
+from storyscraper import filter_text
 import re
 
 text = "My fiancee (28f) and I (29m) are getting married in a couple of months. We both lost our moms. While my fiancee was raised by her grandparents, I was raised by dad and later my stepmother, his second wife. So while my fiancee has no drama about wanting to display a photo of her late mom. There is some about me displaying my mom. My siblings get why I want to do it. But my stepmother and stepsiblings do not. They feel her late husband/their late dad and their late child/sibling should also get photos displayed since they are also immediate family. But they're not my family, immediate or otherwise. Both of them had passed before my dad met his wife.My stepmother feels insecure that I don't just want to have photos of late family but of just my mom, she feels like it's a dig at her because I also don't call her my mom and I'm not close to her. My dad just wants his wife and stepkids happy. Stepkids feel like I should embrace \"all parts of the family but here and not here\" and they said if they did the photo thing, they'd include my mom with their dad.I made my stance clear and my answer was no. Which only brought more of the \"we're either a family or we're not\". My siblings stayed by my side and one of them was like well we're not an actual family so it's whatever, which only added fuel to the fire. I was then told I need to do this to restore family harmony and I should want to do this for my family. I told them I don't want to do this for them and I won't. They said it should be all three photos or none at all.AITA?"
 title = "AITA for not agreeing to display a photo of my stepmothers late husband and child at my wedding?"
 
-# TODO: Remove/reformat text to not contain quotation marks and colons
+# TODO: Remove/reformat text to not contain quotation marks and colons also make sure less than 5000 bytes
 
 def make_n_stories():
     """
@@ -95,7 +96,8 @@ def expand_text(text):
         "YTA": "You're the A-hole",
         "TIFU": "Today I effed up",
         "WIBTA": "Would I be the A-hole",
-        "TA": "The A-hole"
+        "TA": "The A-hole",
+        "AITAH": "Am I the A-hole"
     }
 
     pattern = re.compile(r'\b(' + '|'.join(re.escape(key) for key in acronyms.keys()) + r')\b')
