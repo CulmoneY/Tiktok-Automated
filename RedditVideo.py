@@ -42,6 +42,7 @@ def story_maker(title: str, text: str, n: int = 0):
         duration = float(
             process.stdout.strip()) + title_duration + 1  # The plus 1 is for a space between the title and video itself
 
+    print(f"DURATION: {duration} <-------------------------------")
     get_background(duration)
     import_title(title, title_duration)
     add_audio(title_duration)
@@ -67,11 +68,11 @@ def add_audio(title_duration):
     # Convert title_duration from seconds to milliseconds and add 1 second gap
     delay = int((title_duration + 1) * 1000)
 
-    # Add the first audio file
+    # Add the first audio file {title}
     os.system("ffmpeg -y -i temp/titlefinal.mp4 -i temp/titletts.mp3 -map 0:v "
               "-map 1:a -c:v copy -c:a aac -strict experimental temp/intermediate_video_with_title_audio.mp4")
 
-    # Add the second audio file with delay
+    # Add the second audio file with delay {text}
     os.system(f"ffmpeg -y -i temp/intermediate_video_with_title_audio.mp4 -i temp/texttts.mp3 -filter_complex"
               f" \"[1:a]adelay={delay}|{delay}[a2]; [0:a][a2]amix=inputs=2:duration=longest[a]\" "
               f"-map 0:v -map \"[a]\" -c:v copy -c:a aac -strict experimental temp/audiovideo.mp4")
@@ -192,13 +193,12 @@ def get_background(duration: float):
     video_extensions = ('.mp4', '.avi', '.mov', '.mkv')
     file_count = sum(
         1 for entry in entries if entry.endswith(video_extensions) and os.path.isfile(os.path.join(directory, entry)))
-
+    print(f"FILE COUNT: {file_count} <-----------")
     # Create dictionary mapping of all files in brainrot folder
     videos = [f for f in os.listdir(directory) if
               os.path.isfile(os.path.join(directory, f)) and f.endswith(video_extensions)]
     videos = {i: f for i, f in enumerate(videos)}
     video_path = directory + videos[random.randint(0, file_count - 1)]
-
     # Pull the duration of the video
     command = f'ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 {video_path}'
     process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
