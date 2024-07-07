@@ -170,7 +170,7 @@ def format_text(title: str) -> tuple:
     characters, curr_word = 0, 1
 
     for word in words:
-        if characters + len(word) + 1 > 57:  # Check if adding this word exceeds line limit
+        if characters + len(word) + 1 > 53:  # Check if adding this word exceeds line limit
             curr_word += 1
             if curr_word > 3:  # Limit to three lines
                 lines[curr_word - 1] += '...'

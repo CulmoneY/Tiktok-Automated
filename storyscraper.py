@@ -49,6 +49,12 @@ def filter_text(text: str) -> str:
     text = text.replace('&amp;', 'and')
     text = text.replace('u2026', '...')
 
+    text = re.sub('fuck', 'fork', text, flags=re.IGNORECASE)
+    text = re.sub('shit', 'poop', text, flags=re.IGNORECASE)
+    text = re.sub('bitch', 'birch', text, flags=re.IGNORECASE)
+    text = re.sub('fucking', 'flocking', text, flags=re.IGNORECASE)
+
+
     translation_table = str.maketrans({
         ';': '',
         '/': '',
